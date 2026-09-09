@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LVGL Designer + FreeRTOS STM32F103 新手手册</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1117;
+      --panel: #121b25;
+      --panel-2: #182534;
+      --text: #e8f0fa;
+      --muted: #9babbc;
+      --line: #2c4056;
+      --accent: #37a2ff;
+      --accent-2: #38d39f;
+      --warn: #ffc86b;
+      --danger: #ff7d88;
+      --code-bg: #07131f;
+      --shadow: 0 18px 48px rgba(0,0,0,.24);
+    }
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f3f7fb;
+      --panel: #ffffff;
+      --panel-2: #eaf2fb;
+      --text: #102033;
+      --muted: #54687d;
+      --line: #cbd9e8;
+      --accent: #0878d1;
+      --accent-2: #15936e;
+      --warn: #9c6500;
+      --danger: #b93242;
+      --code-bg: #132235;
+      --shadow: 0 18px 48px rgba(24,65,110,.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 92% -14%, rgba(55,162,255,.22), transparent 34rem), var(--bg);
+      color: var(--text);
+      font: 15px/1.72 "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+    }
+    .progress { position: fixed; inset: 0 0 auto; z-index: 80; height: 3px; background: transparent; }
+    .progress i { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px clamp(16px, 4vw, 44px);
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .toolbar-inner { max-width: 1180px; margin: 0 auto; }
+    .topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: .02em; }
+    .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .counter { color: var(--muted); white-space: nowrap; }
+    button, select, input, textarea { font: inherit; }
+    .tool-btn, .chip, select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: var(--panel);
+      cursor: pointer;
+    }
+    .tool-btn, .chip { padding: 0 11px; }
+    .tool-btn:hover, .chip:hover { border-color: var(--accent); background: var(--panel-2); }
+    .mode-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .mode {
+      min-height: 42px;
+      padding: 7px 10px;
+      color: var(--muted);
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .mode strong { display: block; color: var(--text); line-height: 1.2; }
+    .mode small { display: block; margin-top: 2px; }
+    .mode.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+    .mode.active strong { color: var(--accent); }
+    .search-wrap { position: relative; margin-top: 12px; }
+    #search {
+      width: 100%;
+      min-height: 46px;
+      padding: 0 122px 0 15px;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      font-size: 16px;
+    }
+    #search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+    .shortcut { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12px; }
+    .filter-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 2px; }
+    select { padding: 0 8px; min-width: 160px; }
+    .layout {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 26px clamp(16px, 4vw, 44px) 76px;
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      gap: 28px;
+    }
+    nav { position: sticky; top: 222px; align-self: start; max-height: calc(100vh - 244px); overflow: auto; }
+    nav a {
+      display: block;
+      padding: 7px 10px;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    nav a:hover, nav a.active { color: var(--text); border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+    main { min-width: 0; }
+    h1 { margin: 0 0 8px; font-size: clamp(29px, 4.2vw, 44px); line-height: 1.18; }
+    h2 { margin: 46px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); font-size: 23px; scroll-margin-top: 230px; }
+    h3 { margin: 26px 0 10px; color: color-mix(in srgb, var(--accent) 72%, var(--text)); font-size: 18px; }
+    p, li { color: color-mix(in srgb, var(--text) 82%, var(--muted)); }
+    a { color: var(--accent); }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 18px 0 26px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--panel-2), var(--panel));
+      box-shadow: var(--shadow);
+    }
+    .hero:after {
+      content: "LVGL + RTOS";
+      position: absolute;
+      right: 18px;
+      bottom: -20px;
+      color: color-mix(in srgb, var(--accent) 14%, transparent);
+      font-size: clamp(42px, 8vw, 86px);
+      font-weight: 900;
+      letter-spacing: -.05em;
+      pointer-events: none;
+    }
+    .hero p { max-width: 760px; margin: 8px 0 0; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      margin: 4px 6px 4px 0;
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--panel);
+      font-size: 12px;
+    }
+    .badge.good { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 55%, var(--line)); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 14px 0 24px; }
+    .card, .callout {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--panel);
+      box-shadow: 0 8px 26px rgba(0,0,0,.08);
+    }
+    .card { padding: 15px; }
+    .card h3, .card h4 { margin: 0 0 8px; }
+    .card p { margin: 6px 0; }
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      margin-right: 8px;
+      color: white;
+      background: var(--accent);
+      border-radius: 8px;
+      font-weight: 800;
+    }
+    .callout { margin: 16px 0; padding: 13px 15px; border-left: 4px solid var(--accent); }
+    .callout.good { border-left-color: var(--accent-2); }
+    .callout.warn { border-left-color: var(--warn); }
+    .callout.danger { border-left-color: var(--danger); }
+    table {
+      width: 100%;
+      margin: 12px 0 24px;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { position: sticky; top: 210px; z-index: 4; color: var(--text); background: var(--panel-2); }
+    tr:hover td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+    code {
+      padding: 2px 6px;
+      color: #a9dcff;
+      background: #0a253b;
+      border-radius: 5px;
+      font-family: Consolas, "Courier New", monospace;
+      cursor: copy;
+    }
+    body[data-theme="light"] code { color: #075c9d; background: #e2f0fc; }
+    pre {
+      position: relative;
+      overflow: auto;
+      margin: 12px 0 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--code-bg);
+      color: #e5f4ff;
+      line-height: 1.56;
+      tab-size: 4;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; cursor: text; }
+    .copy-code {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      min-height: 30px;
+      padding: 0 10px;
+      border: 1px solid #3d5e7f;
+      border-radius: 7px;
+      color: #e5f4ff;
+      background: #17314a;
+      cursor: pointer;
+    }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 22px; }
+    .flow span { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+    .flow b { color: var(--accent); }
+    .checklist { display: grid; gap: 10px; margin: 14px 0 22px; }
+    .check-item { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+    .check-item input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--accent); }
+    .check-item.done span { color: var(--muted); text-decoration: line-through; }
+    .notes { width: 100%; min-height: 160px; padding: 13px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; resize: vertical; }
+    .empty { display: none; padding: 36px 18px; color: var(--muted); text-align: center; border: 1px dashed var(--line); border-radius: 12px; }
+    .hidden { display: none !important; }
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 90;
+      padding: 10px 14px;
+      color: white;
+      background: #176aa8;
+      border: 1px solid #55b9ff;
+      border-radius: 9px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: .18s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .back-top {
+      position: fixed;
+      right: 22px;
+      bottom: 72px;
+      z-index: 70;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--text);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: .18s;
+    }
+    .back-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    footer { margin-top: 48px; padding-top: 16px; color: var(--muted); border-top: 1px solid var(--line); }
+    @media (max-width: 850px) {
+      .toolbar { padding: 12px 16px; }
+      .topline { flex-wrap: wrap; }
+      .tools { width: 100%; }
+      .mode-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mode small { display: none; }
+      #search { padding-right: 16px; }
+      .shortcut { display: none; }
+      .layout { grid-template-columns: 1fr; padding-left: 20px; padding-right: 20px; }
+      nav { position: static; display: flex; gap: 4px; overflow-x: auto; max-height: none; }
+      nav a { white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; }
+      main { width: calc(100vw - 40px); max-width: 100%; }
+      th { position: static; }
+      table { display: block; overflow-x: auto; }
+    }
+    @media print {
+      .toolbar, nav, .progress, .copy-code, .back-top, .toast { display: none; }
+      .layout { display: block; max-width: none; padding: 0; }
+      body { background: white; color: black; }
+      p, li { color: #222; }
+      table, .card, .callout { background: white; box-shadow: none; }
+      th { position: static; background: #eee; color: black; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress"><i id="progressBar"></i></div>
+  <header class="toolbar">
+    <div class="toolbar-inner">
+      <div class="topline">
+        <div class="brand">LVGL Designer + FreeRTOS 新手手册</div>
+        <div class="tools">
+          <span class="counter" id="counter">准备完成</span>
+          <button class="tool-btn" id="fontBtn" type="button">字号</button>
+          <button class="tool-btn" id="themeBtn" type="button">明暗</button>
+          <button class="tool-btn" id="printBtn" type="button">打印</button>
+        </div>
+      </div>
+      <div class="mode-row" role="group" aria-label="阅读模式">
+        <button class="mode active" type="button" data-mode="all"><strong>全部</strong><small>完整路线</small></button>
+        <button class="mode" type="button" data-mode="designer"><strong>Designer</strong><small>术语和事件</small></button>
+        <button class="mode" type="button" data-mode="rtos"><strong>FreeRTOS</strong><small>任务通信</small></button>
+        <button class="mode" type="button" data-mode="project"><strong>项目实战</strong><small>上板闭环</small></button>
+      </div>
+      <div class="search-wrap">
+        <input id="search" type="search" autocomplete="off" placeholder="搜索：任务、队列、页面跳转、LV_EVENT_CLICKED、flush、互斥锁、SD卡……">
+        <span class="shortcut">Ctrl+K / Esc</span>
+      </div>
+      <div class="filter-row">
+        <select id="sectionFilter"><option value="">全部章节</option></select>
+        <button class="chip" type="button" data-query="页面跳转">页面跳转</button>
+        <button class="chip" type="button" data-query="事件">事件</button>
+        <button class="chip" type="button" data-query="任务">任务</button>
+        <button class="chip" type="button" data-query="队列">队列</button>
+        <button class="chip" type="button" data-query="互斥锁">互斥锁</button>
+        <button class="chip" type="button" data-query="中断">中断</button>
+        <button class="chip" type="button" data-query="显示接口">显示接口</button>
+        <button class="chip" type="button" data-query="输入设备">输入设备</button>
+        <button class="chip" type="button" data-query="SD卡">SD卡</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav id="nav" aria-label="章节导航"></nav>
+    <main id="content">
+      <h1>给新手的 LVGL Designer + FreeRTOS STM32F103 小手册</h1>
+      <div class="hero">
+        <span class="badge good">离线搜索</span>
+        <span class="badge">LVGL UI Designer</span>
+        <span class="badge">DShanMCU-F103 / STM32F103</span>
+        <span class="badge">FreeRTOS 入门</span>
+        <p>这份文档把你原来的 LVGL UI Designer 中英术语/API 手册，和 100ASK FreeRTOS DShanMCU-F103 学习路线融合起来。目标很简单：新手先知道 Designer 每个词是什么意思，再知道这些事件怎样落到 FreeRTOS 任务、队列、按键、屏幕和 SD 卡里。</p>
+      </div>
+
+      <section data-group="project">
+        <h2>一、先建立整体地图</h2>
+        <div class="flow">
+          <span>Designer 画界面</span><b>→</b>
+          <span>导出 LVGL 代码</span><b>→</b>
+          <span>FreeRTOS 分任务</span><b>→</b>
+          <span>驱动屏幕/按键/SD 卡</span><b>→</b>
+          <span>用队列把硬件事件送到 UI</span>
+        </div>
+        <p>刚开始不要急着背 API。你只需要抓住一句话：Designer 负责“长什么样、点击哪里”，FreeRTOS 负责“谁在后台干活、谁把消息送给谁”，LVGL 负责“把界面画到屏幕上并处理事件”。</p>
+        <div class="grid">
+          <div class="card"><h3><span class="num">1</span>界面层</h3><p>页面、控件、样式、状态、事件。比如点击相册按钮进入相册页。</p></div>
+          <div class="card"><h3><span class="num">2</span>系统层</h3><p>任务、队列、互斥锁、事件组、软件定时器。比如按键任务把 K8 的确认事件发给 UI 任务。</p></div>
+          <div class="card"><h3><span class="num">3</span>硬件层</h3><p>LCD、触摸或按键、摄像头、SD 卡、串口调试。比如拍照后把文件写入 SD 卡。</p></div>
+        </div>
+        <div class="callout good"><strong>新手建议：</strong>先用电脑模拟器把页面跳转和鼠标点击跑通，再上板接真实 K2、K6、K7、K13、K8 按键。这样问题会少一半。</div>
+      </section>
+
+      <section data-group="designer">
+        <h2>二、Designer 常见术语中英对照</h2>
+        <table>
+          <thead><tr><th>英文</th><th>中文</th><th>新手理解</th><th>常见 API/概念</th></tr></thead>
+          <tbody>
+            <tr><td>Property</td><td>属性</td><td>控件本身的数据：位置、大小、文字、数值。</td><td><code>lv_obj_set_x</code>、<code>lv_label_set_text</code></td></tr>
+            <tr><td>Style</td><td>样式</td><td>控件看起来怎样：颜色、边框、字体、圆角。</td><td><code>lv_obj_set_style_bg_color</code></td></tr>
+            <tr><td>Part</td><td>样式部件</td><td>一个控件内部可以分区设置样式，例如滑块主体和指示条。</td><td><code>LV_PART_MAIN</code>、<code>LV_PART_INDICATOR</code></td></tr>
+            <tr><td>State</td><td>状态</td><td>控件处于普通、按下、选中、禁用等状态。</td><td><code>LV_STATE_DEFAULT</code>、<code>LV_STATE_PRESSED</code></td></tr>
+            <tr><td>Event</td><td>事件</td><td>什么时候触发逻辑：点击、长按、值改变、页面加载。</td><td><code>lv_obj_add_event_cb</code></td></tr>
+            <tr><td>Action</td><td>动作</td><td>事件发生后做什么：跳转页面、隐藏控件、执行自定义函数。</td><td>Designer 动作 / C 回调函数</td></tr>
+            <tr><td>Screen</td><td>页面/屏幕</td><td>一个完整界面，例如启动页、图传页、相册页。</td><td><code>lv_screen_load</code>、<code>lv_screen_load_anim</code></td></tr>
+            <tr><td>Image Button</td><td>图片按钮</td><td>看起来是图标，本质可以点击，适合相机/相册/上下翻。</td><td><code>lv_imagebutton_create</code></td></tr>
+            <tr><td>Flags</td><td>标志</td><td>控制可点击、可滚动、隐藏等行为。</td><td><code>LV_OBJ_FLAG_CLICKABLE</code>、<code>LV_OBJ_FLAG_HIDDEN</code></td></tr>
+            <tr><td>Animation</td><td>动画</td><td>让页面或控件有淡入、移动、缩放等变化。</td><td><code>lv_anim_t</code>、<code>lv_screen_load_anim</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><strong>最容易混的地方：</strong><code>pressed</code> 是视觉状态，<code>LV_EVENT_PRESSED</code> 才是事件；<code>style</code> 改外观，<code>event</code> 改逻辑。</div>
+      </section>
+
+      <section data-group="designer">
+        <h2>三、事件类型和页面动作</h2>
+        <table>
+          <thead><tr><th>事件</th><th>中文</th><th>什么时候用</th><th>项目例子</th></tr></thead>
+          <tbody>
+            <tr><td><code>LV_EVENT_CLICKED</code></td><td>单击/点击完成</td><td>按钮最常用事件，按下再松开后触发。</td><td>点击相册图标进入相册。</td></tr>
+            <tr><td><code>LV_EVENT_PRESSED</code></td><td>按下</td><td>手指或鼠标刚按下时触发。</td><td>按下图标时改变颜色。</td></tr>
+            <tr><td><code>LV_EVENT_PRESSING</code></td><td>正在按住</td><td>持续按住期间反复触发。</td><td>长按连续快进，谨慎使用。</td></tr>
+            <tr><td><code>LV_EVENT_LONG_PRESSED</code></td><td>长按</td><td>按住超过阈值后触发一次。</td><td>长按 SD 图标进入相册。</td></tr>
+            <tr><td><code>LV_EVENT_LONG_PRESSED_REPEAT</code></td><td>长按重复</td><td>长按后周期性重复触发。</td><td>连续上一张/下一张。</td></tr>
+            <tr><td><code>LV_EVENT_RELEASED</code></td><td>释放</td><td>按键松开时触发。</td><td>停止连续动作。</td></tr>
+            <tr><td><code>LV_EVENT_VALUE_CHANGED</code></td><td>值改变</td><td>滑块、开关、下拉框改变。</td><td>亮度滑块改变背光。</td></tr>
+            <tr><td><code>LV_EVENT_SCREEN_LOADED</code></td><td>页面加载完成</td><td>进入页面后初始化内容。</td><td>相册页加载第一张照片。</td></tr>
+            <tr><td><code>LV_EVENT_SCREEN_UNLOADED</code></td><td>页面卸载完成</td><td>离开页面后释放资源。</td><td>离开视频页后停止解码。</td></tr>
+            <tr><td><code>LV_EVENT_DELETE</code></td><td>对象删除</td><td>控件被删除时清理资源。</td><td>清理图片缓存。</td></tr>
+          </tbody>
+        </table>
+        <h3>页面跳转的两种写法</h3>
+        <pre><code class="language-c">// 直接切换页面
+lv_screen_load(B_Video_Link_Screen_3000_06_4302644);
+
+// 带一点消失感/淡入淡出
+lv_screen_load_anim(B_Video_Link_Screen_3000_06_4302644,
+                    LV_SCR_LOAD_ANIM_FADE_ON,
+                    300, 0, false);</code></pre>
+        <p>Designer 里可以配置“页面跳转”动作；如果 Designer 开放“自定义函数事件”，也可以让按钮事件调用你导出代码里的 C 函数。</p>
+      </section>
+
+      <section data-group="rtos">
+        <h2>四、FreeRTOS 先学哪几个概念</h2>
+        <table>
+          <thead><tr><th>概念</th><th>中文解释</th><th>常用函数</th><th>和 LVGL 的关系</th></tr></thead>
+          <tbody>
+            <tr><td>Task</td><td>任务，像同时运行的“小程序”。</td><td><code>xTaskCreate</code>、<code>vTaskDelay</code></td><td>通常单独建一个 UI 任务周期调用 <code>lv_timer_handler</code>。</td></tr>
+            <tr><td>Queue</td><td>队列，用来在线程之间传递消息。</td><td><code>xQueueCreate</code>、<code>xQueueSend</code>、<code>xQueueReceive</code></td><td>按键任务把按键事件发给 UI 任务。</td></tr>
+            <tr><td>Semaphore</td><td>信号量，用来通知或计数。</td><td><code>xSemaphoreCreateBinary</code>、<code>xSemaphoreGive</code></td><td>DMA 刷屏完成后通知等待方。</td></tr>
+            <tr><td>Mutex</td><td>互斥量，保护共享资源。</td><td><code>xSemaphoreCreateMutex</code>、<code>xSemaphoreTake</code></td><td>保护 LVGL 调用或文件系统访问。</td></tr>
+            <tr><td>Event Group</td><td>事件组，用多个 bit 表示多个条件。</td><td><code>xEventGroupSetBits</code>、<code>xEventGroupWaitBits</code></td><td>等待 SD 卡就绪、摄像头就绪、屏幕就绪。</td></tr>
+            <tr><td>Task Notification</td><td>任务通知，轻量级的一对一通知。</td><td><code>xTaskNotifyGive</code>、<code>ulTaskNotifyTake</code></td><td>适合 ISR 通知某个任务处理。</td></tr>
+            <tr><td>Software Timer</td><td>软件定时器，周期执行轻量逻辑。</td><td><code>xTimerCreate</code>、<code>xTimerStart</code></td><td>定时刷新状态栏电量、录制时间。</td></tr>
+            <tr><td>ISR API</td><td>中断专用 API，名字常带 FromISR。</td><td><code>xQueueSendFromISR</code></td><td>按键中断里不要直接操作 UI，发消息即可。</td></tr>
+          </tbody>
+        </table>
+        <div class="callout warn"><strong>重点纪律：</strong>LVGL 不是随便哪个任务都能乱调。新手最稳的结构是：只有 UI 任务直接调用 LVGL，其他任务通过队列发消息给 UI 任务。</div>
+      </section>
+
+      <section data-group="rtos">
+        <h2>五、推荐的软件结构</h2>
+        <div class="flow">
+          <span>按键/触摸任务</span><b>→ Queue</b>
+          <span>UI 任务</span><b>→</b>
+          <span>LVGL 页面跳转</span>
+        </div>
+        <div class="flow">
+          <span>摄像头任务</span><b>→ Queue/EventGroup</b>
+          <span>图传页</span><b>→</b>
+          <span>更新状态图标</span>
+        </div>
+        <div class="flow">
+          <span>SD 卡/文件任务</span><b>→ Queue</b>
+          <span>相册页</span><b>→</b>
+          <span>上一张/下一张/循环播放</span>
+        </div>
+        <pre><code class="language-c">typedef enum {
+    UI_MSG_KEY_CAMERA,
+    UI_MSG_KEY_VIDEO,
+    UI_MSG_KEY_UP,
+    UI_MSG_KEY_DOWN,
+    UI_MSG_KEY_OK,
+    UI_MSG_SD_READY,
+    UI_MSG_PHOTO_SAVED,
+    UI_MSG_ERROR
+} ui_msg_id_t;
+
+typedef struct {
+    ui_msg_id_t id;
+    uint32_t value;
+} ui_msg_t;
+
+static QueueHandle_t ui_queue;
+
+static void ui_task(void *arg)
+{
+    ui_msg_t msg;
+
+    while (1) {
+        while (xQueueReceive(ui_queue, &msg, 0) == pdTRUE) {
+            ui_handle_message(&msg);
+        }
+
+        lv_timer_handler();
+        vTaskDelay(pdMS_TO_TICKS(5));
+    }
+}</code></pre>
+        <p>这段结构非常适合你的项目：K2/K6/K7/K13/K8 最终都变成 <code>ui_msg_t</code>，鼠标点击模拟也调用同一套 <code>ui_handle_message</code>，这样模拟器和真板逻辑不会分叉。</p>
+      </section>
+
+      <section data-group="rtos">
+        <h2>六、LVGL 移植到 STM32F103 的关键接口</h2>
+        <table>
+          <thead><tr><th>接口</th><th>作用</th><th>新手要检查什么</th></tr></thead>
+          <tbody>
+            <tr><td><code>lv_init()</code></td><td>初始化 LVGL 内部模块。</td><td>必须在创建任何控件之前调用。</td></tr>
+            <tr><td><code>lv_tick_inc(ms)</code></td><td>告诉 LVGL 经过了多少毫秒。</td><td>一般放在 1ms 定时器或 SysTick 回调里。</td></tr>
+            <tr><td><code>lv_timer_handler()</code></td><td>让 LVGL 处理动画、输入、刷新。</td><td>UI 任务里周期调用，常见 5ms 左右。</td></tr>
+            <tr><td>display flush</td><td>把 LVGL 的颜色缓冲区刷到 LCD。</td><td>刷完必须通知 LVGL，本版本接口名以项目头文件为准。</td></tr>
+            <tr><td>input read</td><td>读取触摸、鼠标、按键。</td><td>模拟器读鼠标，上板读 GPIO/ADC/触摸芯片。</td></tr>
+            <tr><td>file system</td><td>让 LVGL 或业务读取图片文件。</td><td>SD 卡通常接 FatFS，注意路径和缓存。</td></tr>
+          </tbody>
+        </table>
+        <pre><code class="language-c">void app_lvgl_init(void)
+{
+    lv_init();
+    board_lcd_init();
+    board_input_init();
+
+    app_lvgl_display_register();
+    app_lvgl_input_register();
+
+    ui_init();   // Designer 导出的界面初始化
+}</code></pre>
+        <div class="callout"><strong>接口名提醒：</strong>LVGL 8 和 LVGL 9 的显示/输入注册 API 有差异，最终以你工程里实际包含的 <code>lvgl.h</code> 和 Designer 导出的代码为准。</div>
+      </section>
+
+      <section data-group="project">
+        <h2>七、把你的页面逻辑落成动作表</h2>
+        <table>
+          <thead><tr><th>页面</th><th>控件/按键</th><th>鼠标模拟</th><th>最终硬件动作</th></tr></thead>
+          <tbody>
+            <tr><td>启动页</td><td><code>A_Startup_Screen</code></td><td>页面加载后淡入图传页</td><td>开机后进入图传页</td></tr>
+            <tr><td>图传页</td><td><code>B_Camera_SD_Icon</code></td><td>单击拍照，长按进相册</td><td>K2 拍照，长按或组合键进相册</td></tr>
+            <tr><td>图传页</td><td><code>B_Camera_Video_Entry_Imagebtn</code></td><td>单击进视频页</td><td>K6 进入视频页</td></tr>
+            <tr><td>图传页</td><td><code>B_Camera_Album_Entry_Imagebtn</code></td><td>单击进相册页</td><td>相册键或菜单进入相册</td></tr>
+            <tr><td>相册页</td><td><code>C_Image_Gallery_UP_Icon</code></td><td>上一张</td><td>K7 上翻</td></tr>
+            <tr><td>相册页</td><td><code>C_Image_Gallery_Down_Icon</code></td><td>下一张</td><td>K13 下翻</td></tr>
+            <tr><td>相册页</td><td><code>C_Image_Gallery_OK_Icon</code></td><td>长按返回图传页</td><td>K8 长按确认/返回</td></tr>
+            <tr><td>视频页</td><td><code>D_Video_UP/Down/OK</code></td><td>上一段、下一段、返回</td><td>K7/K13/K8</td></tr>
+          </tbody>
+        </table>
+        <pre><code class="language-c">static void ui_handle_message(const ui_msg_t *msg)
+{
+    switch (msg->id) {
+    case UI_MSG_KEY_CAMERA:
+        app_camera_take_photo();
+        break;
+    case UI_MSG_KEY_VIDEO:
+        lv_screen_load_anim(D_Video_Screen_3000_06_4302644,
+                            LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, false);
+        break;
+    case UI_MSG_KEY_UP:
+        gallery_show_prev();
+        break;
+    case UI_MSG_KEY_DOWN:
+        gallery_show_next();
+        break;
+    case UI_MSG_KEY_OK:
+        lv_screen_load_anim(B_Video_Link_Screen_3000_06_4302644,
+                            LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, false);
+        break;
+    default:
+        break;
+    }
+}</code></pre>
+      </section>
+
+      <section data-group="project">
+        <h2>八、鼠标点击模拟硬件按键</h2>
+        <p>模拟阶段不要急着接 GPIO。把每个图片按钮的点击事件都转换成同一套 UI 消息，后面上板时只要让真实按键也发同样的消息即可。</p>
+        <pre><code class="language-c">static void send_ui_msg(ui_msg_id_t id)
+{
+    ui_msg_t msg = { .id = id, .value = 0 };
+    xQueueSend(ui_queue, &msg, 0);
+}
+
+static void on_album_next_clicked(lv_event_t *e)
+{
+    send_ui_msg(UI_MSG_KEY_DOWN);
+}
+
+static void on_album_prev_clicked(lv_event_t *e)
+{
+    send_ui_msg(UI_MSG_KEY_UP);
+}
+
+static void on_back_long_pressed(lv_event_t *e)
+{
+    send_ui_msg(UI_MSG_KEY_OK);
+}</code></pre>
+        <div class="callout good"><strong>这样做的好处：</strong>鼠标、触摸、真实按键最后都走一套业务函数。你测通跳转逻辑后，接硬件按键时不需要重写 UI。</div>
+      </section>
+
+      <section data-group="rtos">
+        <h2>九、CubeMX 和工程创建路线</h2>
+        <div class="grid">
+          <div class="card"><h3>开发环境</h3><p>准备 Keil MDK、STM32CubeMX、STM32CubeProgrammer。先能编译下载空工程，再加 FreeRTOS。</p></div>
+          <div class="card"><h3>时钟和调试</h3><p>配置 HSE/SYSCLK、SWD 调试接口、串口打印。调试口不要被普通 GPIO 占用。</p></div>
+          <div class="card"><h3>外设模块</h3><p>LCD、按键、SD 卡、串口、定时器逐个验证。每加一个模块就编译一次。</p></div>
+          <div class="card"><h3>FreeRTOS</h3><p>先建 LED 任务和串口打印任务，确认调度正常，再加入 LVGL UI 任务。</p></div>
+        </div>
+        <table>
+          <thead><tr><th>阶段</th><th>成功标志</th><th>失败时先看</th></tr></thead>
+          <tbody>
+            <tr><td>裸机空工程</td><td>能下载，LED 或串口能工作。</td><td>时钟、下载器、启动文件、工程路径。</td></tr>
+            <tr><td>FreeRTOS 工程</td><td>两个任务能交替打印。</td><td>堆大小、任务栈、优先级、SysTick。</td></tr>
+            <tr><td>LCD 驱动</td><td>能刷纯色和矩形。</td><td>SPI/FSMC、复位脚、背光、颜色格式。</td></tr>
+            <tr><td>LVGL 工程</td><td>能显示一个标签或按钮。</td><td><code>lv_tick_inc</code>、flush 完成通知、缓冲区。</td></tr>
+            <tr><td>Designer 工程</td><td>能显示导出的页面。</td><td>文件是否加入工程、资源路径、字体图片资源。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-group="rtos">
+        <h2>十、任务、优先级和延时的经验值</h2>
+        <table>
+          <thead><tr><th>任务</th><th>建议优先级</th><th>周期/阻塞方式</th><th>注意</th></tr></thead>
+          <tbody>
+            <tr><td>UI 任务</td><td>中等偏高</td><td><code>lv_timer_handler()</code> 后延时 5ms</td><td>不要做耗时文件扫描。</td></tr>
+            <tr><td>按键任务</td><td>中等</td><td>10-20ms 扫描或中断通知</td><td>消抖后发队列。</td></tr>
+            <tr><td>摄像头任务</td><td>较高</td><td>按帧或事件阻塞</td><td>不要直接改 UI 控件。</td></tr>
+            <tr><td>SD 卡任务</td><td>中等偏低</td><td>队列触发</td><td>文件读写加互斥锁。</td></tr>
+            <tr><td>状态刷新任务</td><td>较低</td><td>500ms-1000ms</td><td>电量、SD 状态、录制时间。</td></tr>
+          </tbody>
+        </table>
+        <p>新手常犯的错是把所有事情都塞进 UI 回调：点击按钮后立刻扫描 SD 卡、解码图片、写文件。正确做法是 UI 回调只发命令，耗时事情交给后台任务，完成后再发消息回 UI。</p>
+      </section>
+
+      <section data-group="rtos">
+        <h2>十一、队列、互斥锁、事件组怎么选</h2>
+        <table>
+          <thead><tr><th>需求</th><th>推荐工具</th><th>例子</th><th>为什么</th></tr></thead>
+          <tbody>
+            <tr><td>传递一个按键或命令</td><td>队列</td><td>K8 确认、K7 上翻</td><td>有顺序、有数据、好调试。</td></tr>
+            <tr><td>保护同一个资源</td><td>互斥锁</td><td>SD 卡文件系统、LVGL 调用</td><td>一次只允许一个任务访问。</td></tr>
+            <tr><td>等待多个条件</td><td>事件组</td><td>等待 LCD + SD + Camera 就绪</td><td>多个 bit 可以组合等待。</td></tr>
+            <tr><td>中断叫醒一个任务</td><td>任务通知</td><td>DMA 完成、按键中断</td><td>轻量，速度快。</td></tr>
+            <tr><td>周期刷新</td><td>软件定时器/低优先级任务</td><td>每秒更新录制时间</td><td>逻辑简单，不阻塞 UI。</td></tr>
+          </tbody>
+        </table>
+        <pre><code class="language-c">static SemaphoreHandle_t lvgl_mutex;
+
+void ui_safe_call(void (*fn)(void))
+{
+    if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE) {
+        fn();
+        xSemaphoreGive(lvgl_mutex);
+    }
+}</code></pre>
+        <div class="callout warn"><strong>更稳的新手做法：</strong>如果能做到“只有 UI 任务调用 LVGL”，就可以少用很多锁；锁是保护伞，不是把复杂结构变简单的魔法。</div>
+      </section>
+
+      <section data-group="project">
+        <h2>十二、相册和 SD 卡逻辑</h2>
+        <p>相册页最适合用“文件列表 + 当前索引”模型。进入相册时扫描 SD 卡，保存图片路径数组；上一张和下一张只改变索引并刷新图片。</p>
+        <pre><code class="language-c">static int gallery_index;
+static int gallery_count;
+
+static int wrap_index(int index, int count)
+{
+    if (count <= 0) return 0;
+    if (index < 0) return count - 1;
+    if (index >= count) return 0;
+    return index;
+}
+
+void gallery_show_next(void)
+{
+    gallery_index = wrap_index(gallery_index + 1, gallery_count);
+    gallery_reload_current_image();
+}
+
+void gallery_show_prev(void)
+{
+    gallery_index = wrap_index(gallery_index - 1, gallery_count);
+    gallery_reload_current_image();
+}</code></pre>
+        <table>
+          <thead><tr><th>情况</th><th>界面应该怎样表现</th><th>代码要防什么</th></tr></thead>
+          <tbody>
+            <tr><td>没有 SD 卡</td><td>显示“未检测到 SD 卡”或灰掉相册入口。</td><td>不要扫描空指针路径。</td></tr>
+            <tr><td>目录为空</td><td>显示空状态，不允许上一张下一张崩溃。</td><td><code>gallery_count == 0</code>。</td></tr>
+            <tr><td>图片损坏</td><td>跳过或显示错误提示。</td><td>解码失败返回值。</td></tr>
+            <tr><td>播放循环</td><td>最后一张下一张回第一张。</td><td>索引越界。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-group="project">
+        <h2>十三、从模拟器到真板的迁移清单</h2>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check="sim-page"><span>模拟器里主页面、图传页、相册页、视频页能正常跳转。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sim-click"><span>每个图片按钮都绑定了鼠标点击或长按事件。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="queue"><span>鼠标点击和硬件按键最终调用同一套 UI 消息处理函数。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="tick"><span><code>lv_tick_inc</code> 稳定运行，<code>lv_timer_handler</code> 周期调用。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="lcd"><span>LCD flush 能显示正确颜色，红蓝不反，方向正确。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="key"><span>K2/K6/K7/K13/K8 消抖完成，并能打印出按键事件。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sd"><span>SD 卡插拔、空目录、图片损坏都有处理。</span></label>
+          <label class="check-item"><input type="checkbox" data-check="stack"><span>每个任务栈余量检查过，没有频繁重启或 HardFault。</span></label>
+        </div>
+      </section>
+
+      <section data-group="rtos">
+        <h2>十四、常见编译和运行问题</h2>
+        <table>
+          <thead><tr><th>现象</th><th>常见原因</th><th>排查顺序</th></tr></thead>
+          <tbody>
+            <tr><td>编译找不到 LVGL 头文件</td><td>Include Path 没加。</td><td>检查 <code>lvgl.h</code> 路径、Designer 导出路径。</td></tr>
+            <tr><td>界面不刷新</td><td>没有调用 tick 或 handler。</td><td>看 <code>lv_tick_inc</code>、<code>lv_timer_handler</code>。</td></tr>
+            <tr><td>屏幕花屏</td><td>颜色格式、分辨率、刷新窗口错误。</td><td>先刷纯色，再刷矩形，再接 LVGL。</td></tr>
+            <tr><td>点击没反应</td><td>控件不可点击或输入设备没注册。</td><td>检查 <code>LV_OBJ_FLAG_CLICKABLE</code> 和 indev read。</td></tr>
+            <tr><td>切页后崩溃</td><td>页面对象未创建、重复释放、资源路径错。</td><td>确认 Designer 初始化顺序和页面变量。</td></tr>
+            <tr><td>随机 HardFault</td><td>任务栈不足、数组越界、ISR API 用错。</td><td>开栈监测、查 <code>FromISR</code> API。</td></tr>
+            <tr><td>中文乱码</td><td>字体不包含中文字库。</td><td>换中文字体资源，确认编码 UTF-8。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-group="designer">
+        <h2>十五、Designer 控件速查</h2>
+        <table>
+          <thead><tr><th>控件</th><th>中文</th><th>适合场景</th><th>常用事件</th></tr></thead>
+          <tbody>
+            <tr><td><code>label</code></td><td>标签</td><td>显示文字、状态、电量、提示。</td><td>通常无事件。</td></tr>
+            <tr><td><code>button</code></td><td>按钮</td><td>普通命令按钮。</td><td><code>LV_EVENT_CLICKED</code></td></tr>
+            <tr><td><code>imagebutton</code></td><td>图片按钮</td><td>相机、相册、上下翻图标。</td><td><code>CLICKED</code>、<code>LONG_PRESSED</code></td></tr>
+            <tr><td><code>image</code></td><td>图片</td><td>背景图、相册图片、状态图标。</td><td>通常无事件，除非设置可点击。</td></tr>
+            <tr><td><code>slider</code></td><td>滑块</td><td>亮度、音量、进度。</td><td><code>VALUE_CHANGED</code></td></tr>
+            <tr><td><code>switch</code></td><td>开关</td><td>开/关设置。</td><td><code>VALUE_CHANGED</code></td></tr>
+            <tr><td><code>dropdown</code></td><td>下拉框</td><td>模式选择、分辨率选择。</td><td><code>VALUE_CHANGED</code></td></tr>
+            <tr><td><code>obj</code></td><td>基础容器</td><td>做面板、分组、列表项。</td><td>可有可无。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-group="project">
+        <h2>十六、一个推荐的学习顺序</h2>
+        <div class="grid">
+          <div class="card"><h3><span class="num">1</span>第 1 天</h3><p>只看 Designer：属性、样式、状态、事件、动作。完成两个页面互跳。</p></div>
+          <div class="card"><h3><span class="num">2</span>第 2 天</h3><p>学 FreeRTOS 任务和队列。写两个任务，一个发消息，一个收消息。</p></div>
+          <div class="card"><h3><span class="num">3</span>第 3 天</h3><p>把 LVGL 放进 UI 任务。显示 Designer 导出的首页。</p></div>
+          <div class="card"><h3><span class="num">4</span>第 4 天</h3><p>接按键：K2/K6/K7/K13/K8 发队列消息，模拟鼠标逻辑迁移到真板。</p></div>
+          <div class="card"><h3><span class="num">5</span>第 5 天</h3><p>接 SD 卡相册：扫描、上一张、下一张、循环播放、异常处理。</p></div>
+          <div class="card"><h3><span class="num">6</span>第 6 天</h3><p>整理工程：注释、错误提示、任务栈检查、打印日志。</p></div>
+        </div>
+      </section>
+
+      <section data-group="rtos">
+        <h2>十七、100ASK FreeRTOS 章节对照</h2>
+        <table>
+          <thead><tr><th>100ASK 章节</th><th>本手册对应能力</th><th>建议怎么学</th></tr></thead>
+          <tbody>
+            <tr><td>课程介绍、程序设计模式</td><td>理解从裸机 while 循环到多任务的变化。</td><td>先理解“为什么需要 RTOS”。</td></tr>
+            <tr><td>开发环境、开发板使用</td><td>能编译、下载、调试 DShanMCU-F103 工程。</td><td>不要跳过环境验证。</td></tr>
+            <tr><td>模块使用说明与 CubeMX 配置</td><td>把 GPIO、串口、定时器、SD 卡等外设配好。</td><td>一个模块一个模块验证。</td></tr>
+            <tr><td>创建 FreeRTOS 工程、源码概述</td><td>知道工程里哪些文件属于内核、哪些属于移植层。</td><td>先会用，再慢慢读源码。</td></tr>
+            <tr><td>内存管理、任务管理</td><td>会建任务，知道栈和堆为什么会出问题。</td><td>重点看任务栈和 <code>heap_4</code>。</td></tr>
+            <tr><td>队列、信号量、互斥量、事件组、任务通知</td><td>会让任务之间安全通信。</td><td>优先掌握队列和互斥量。</td></tr>
+            <tr><td>软件定时器、中断管理、资源管理</td><td>会处理周期任务、中断延迟处理和共享资源。</td><td>注意 <code>FromISR</code> API。</td></tr>
+            <tr><td>调试与优化</td><td>会用打印、断言、任务统计查问题。</td><td>每个阶段保留可观察日志。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-group="project">
+        <h2>十八、我的项目笔记</h2>
+        <p>这里的笔记会保存在当前浏览器本机缓存里，适合记录板卡参数、按键映射、屏幕驱动、编译错误。</p>
+        <textarea class="notes" id="notes" placeholder="例：屏幕 480x272；K2=相机；K6=视频；K7=上翻；K13=下翻；K8=确认；LVGL handler 周期 5ms……"></textarea>
+        <div class="filter-row">
+          <button class="tool-btn" id="saveNotes" type="button">保存笔记</button>
+          <button class="tool-btn" id="copyNotes" type="button">复制笔记</button>
+          <button class="tool-btn" id="clearNotes" type="button">清空笔记</button>
+        </div>
+        <div class="callout"><strong>参考来源：</strong>本文融合了本地《LVGL_UI_Designer_中英术语与API新手手册_融合深化版.html》的交互结构与术语路线，并参考 100ASK《LVGL 8.2 中文文档》入口：<a href="https://lvgl.100ask.net/8.2/intro/index.html" target="_blank" rel="noreferrer">lvgl.100ask.net/8.2/intro/index.html</a>，以及 100ASK《FreeRTOS入门与工程实践-基于STM32F103》DShanMCU-F103 文档目录：<a href="https://rtos.100ask.net/zh/FreeRTOS/DShanMCU-F103/" target="_blank" rel="noreferrer">rtos.100ask.net/zh/FreeRTOS/DShanMCU-F103/</a>。具体 API 以你工程中的 LVGL/FreeRTOS 版本头文件为准。</div>
+      </section>
+
+      <div class="empty" id="empty">没有找到匹配内容，请换一个更短的关键词。</div>
+      <footer>这是一份面向新手的学习手册，不替代芯片手册、LVGL 官方头文件和 100ASK 原教程。真正做项目时，以工程编译结果和硬件测试为准。</footer>
+    </main>
+  </div>
+
+  <button class="back-top" id="backTop" type="button" title="返回顶部">↑</button>
+  <div class="toast" id="toast">已复制</div>
+
+  <script>
+    (() => {
+      const input = document.getElementById('search');
+      const counter = document.getElementById('counter');
+      const nav = document.getElementById('nav');
+      const sectionFilter = document.getElementById('sectionFilter');
+      const empty = document.getElementById('empty');
+      const toast = document.getElementById('toast');
+      const progressBar = document.getElementById('progressBar');
+      const backTop = document.getElementById('backTop');
+      const modes = [...document.querySelectorAll('[data-mode]')];
+      let activeMode = localStorage.getItem('lvgl_freertos_mode') || 'all';
+      const sections = [];
+
+      document.querySelectorAll('main section').forEach((section, index) => {
+        const heading = section.querySelector('h2');
+        const id = 'section-' + (index + 1);
+        heading.id = id;
+        const group = section.dataset.group || 'project';
+        const link = document.createElement('a');
+        link.href = '#' + id;
+        link.textContent = heading.textContent;
+        link.dataset.group = group;
+        nav.appendChild(link);
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = heading.textContent;
+        option.dataset.group = group;
+        sectionFilter.appendChild(option);
+        sections.push({ section, heading, link, group });
+      });
+
+      function normalize(value) {
+        return String(value).toLocaleLowerCase('zh-CN').replace(/lv_event_/g, '').replace(/[\s_\-\/]+/g, '');
+      }
+
+      const aliases = [
+        ['click', 'clicked', '点击', '单击'],
+        ['longpressed', '长按'],
+        ['screen', '页面', '切页', '跳转'],
+        ['task', 'thread', '任务', '线程'],
+        ['queue', '队列', '消息'],
+        ['mutex', '互斥', '互斥锁'],
+        ['semaphore', '信号量'],
+        ['eventgroup', '事件组'],
+        ['notification', '通知', '任务通知'],
+        ['timer', '定时器'],
+        ['interrupt', 'isr', '中断'],
+        ['display', 'flush', 'lcd', '显示', '屏幕'],
+        ['input', 'indev', '按键', '触摸', '鼠标'],
+        ['sd', 'fatfs', '文件', '相册'],
+        ['style', '样式'],
+        ['property', '属性'],
+        ['state', '状态'],
+        ['action', '动作'],
+        ['animation', '动画']
+      ].map(group => group.map(normalize));
+
+      function matches(text, term) {
+        if (text.includes(term)) return true;
+        const group = aliases.find(items => items.includes(term));
+        return !!group && group.some(alias => text.includes(alias));
+      }
+
+      function applyMode() {
+        modes.forEach(button => {
+          const selected = button.dataset.mode === activeMode;
+          button.classList.toggle('active', selected);
+          button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        });
+        [...sectionFilter.options].forEach(option => {
+          option.hidden = !!option.dataset.group && activeMode !== 'all' && option.dataset.group !== activeMode;
+        });
+      }
+
+      function filter() {
+        const terms = input.value.trim().split(/\s+/).map(normalize).filter(Boolean);
+        const selected = sectionFilter.value;
+        let visible = 0;
+        sections.forEach(item => {
+          const modeOk = activeMode === 'all' || activeMode === item.group;
+          const sectionOk = !selected || selected === item.heading.id;
+          const text = normalize(item.section.textContent);
+          const hit = modeOk && sectionOk && (!terms.length || terms.every(term => matches(text, term)));
+          item.section.classList.toggle('hidden', !hit);
+          item.link.classList.toggle('hidden', !hit);
+          if (hit) visible++;
+        });
+        empty.style.display = visible === 0 ? 'block' : 'none';
+        counter.textContent = visible + ' / ' + sections.length + ' 章';
+      }
+
+      input.addEventListener('input', filter);
+      sectionFilter.addEventListener('change', filter);
+      document.querySelectorAll('[data-query]').forEach(button => {
+        button.addEventListener('click', () => {
+          activeMode = 'all';
+          localStorage.setItem('lvgl_freertos_mode', activeMode);
+          sectionFilter.value = '';
+          input.value = button.dataset.query;
+          applyMode();
+          filter();
+          input.focus();
+        });
+      });
+      modes.forEach(button => {
+        button.addEventListener('click', () => {
+          activeMode = button.dataset.mode;
+          localStorage.setItem('lvgl_freertos_mode', activeMode);
+          sectionFilter.value = '';
+          applyMode();
+          filter();
+        });
+      });
+
+      let toastTimer;
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const area = document.createElement('textarea');
+          area.value = text;
+          area.style.position = 'fixed';
+          area.style.opacity = '0';
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand('copy');
+          area.remove();
+        }
+        toast.textContent = '已复制';
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1300);
+      }
+
+      document.querySelectorAll('code').forEach(code => {
+        code.title = '点击复制';
+        code.addEventListener('click', () => copyText(code.textContent));
+      });
+      document.querySelectorAll('pre').forEach(pre => {
+        const btn = document.createElement('button');
+        btn.className = 'copy-code';
+        btn.type = 'button';
+        btn.textContent = '复制代码';
+        btn.addEventListener('click', event => {
+          event.stopPropagation();
+          copyText(pre.querySelector('code')?.textContent || pre.textContent);
+        });
+        pre.appendChild(btn);
+      });
+
+      const savedTheme = localStorage.getItem('lvgl_freertos_theme') || 'dark';
+      document.body.dataset.theme = savedTheme;
+      document.getElementById('themeBtn').addEventListener('click', () => {
+        const next = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+        document.body.dataset.theme = next;
+        localStorage.setItem('lvgl_freertos_theme', next);
+      });
+      const fontScales = [1, 1.12, 1.25];
+      let fontIndex = Number(localStorage.getItem('lvgl_freertos_font') || 0) % fontScales.length;
+      function applyFont() {
+        document.body.style.fontSize = (15 * fontScales[fontIndex]) + 'px';
+        document.getElementById('fontBtn').textContent = ['字号', '字号+', '字号++'][fontIndex];
+      }
+      document.getElementById('fontBtn').addEventListener('click', () => {
+        fontIndex = (fontIndex + 1) % fontScales.length;
+        localStorage.setItem('lvgl_freertos_font', String(fontIndex));
+        applyFont();
+      });
+      applyFont();
+      document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+      document.querySelectorAll('[data-check]').forEach(box => {
+        const key = 'lvgl_freertos_check_' + box.dataset.check;
+        box.checked = localStorage.getItem(key) === '1';
+        box.closest('.check-item')?.classList.toggle('done', box.checked);
+        box.addEventListener('change', () => {
+          localStorage.setItem(key, box.checked ? '1' : '0');
+          box.closest('.check-item')?.classList.toggle('done', box.checked);
+        });
+      });
+
+      const notes = document.getElementById('notes');
+      notes.value = localStorage.getItem('lvgl_freertos_notes') || '';
+      document.getElementById('saveNotes').addEventListener('click', () => {
+        localStorage.setItem('lvgl_freertos_notes', notes.value);
+        toast.textContent = '笔记已保存';
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1300);
+      });
+      document.getElementById('copyNotes').addEventListener('click', () => copyText(notes.value || '暂无笔记'));
+      document.getElementById('clearNotes').addEventListener('click', () => {
+        if (!confirm('确认清空本机保存的笔记吗？')) return;
+        notes.value = '';
+        localStorage.removeItem('lvgl_freertos_notes');
+      });
+
+      function updateProgress() {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = max > 0 ? window.scrollY / max : 0;
+        progressBar.style.width = Math.min(100, Math.max(0, ratio * 100)) + '%';
+        backTop.classList.toggle('show', window.scrollY > 500);
+      }
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      window.addEventListener('resize', updateProgress);
+      backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            nav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
+            nav.querySelector(`a[href="#${entry.target.id}"]`)?.classList.add('active');
+          });
+        }, { rootMargin: '-24% 0px -66% 0px' });
+        sections.forEach(item => observer.observe(item.heading));
+      }
+
+      document.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+          event.preventDefault();
+          input.focus();
+          input.select();
+        } else if (event.key === 'Escape') {
+          input.value = '';
+          sectionFilter.value = '';
+          filter();
+          input.blur();
+        }
+      });
+
+      applyMode();
+      filter();
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>
