@@ -88,6 +88,11 @@
       function goHome() {
         document.body.classList.remove('reading');
         results.classList.remove('show');
+        history.replaceState(null, '', location.pathname);
+      }
+
+      function goEntrance() {
+        window.location.href = new URL('./LVGL_个人知识库_完整融合版_可独立使用.html', document.baseURI).href;
       }
 
       function doSearch() {
@@ -145,7 +150,7 @@
         search.value = btn.dataset.query;
         doSearch();
       }));
-      document.getElementById('homeBtn').addEventListener('click', goHome);
+      document.getElementById('homeBtn').addEventListener('click', goEntrance);
       document.getElementById('backBtn').addEventListener('click', goHome);
       document.getElementById('downloadBtn').addEventListener('click', downloadCurrent);
       document.getElementById('copyIndexBtn').addEventListener('click', () => {
@@ -161,4 +166,6 @@
       });
       const saved = localStorage.getItem('lvgl_kb_current');
       if (saved && MODULES.some(module => module.id === saved)) current = MODULES.find(module => module.id === saved);
+      const requested = new URLSearchParams(location.search).get('module');
+      if (requested && MODULES.some(module => module.id === requested)) openModule(requested);
     })();
