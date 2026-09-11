@@ -36,7 +36,7 @@ document.getElementById('knowledgeBaseRoot').innerHTML = String.raw`
 
       <section class="search-panel">
         <div class="search-box">
-          <input id="search" type="search" autocomplete="off" placeholder="搜索：事件、页面跳转、队列、SD卡、LV_EVENT_CLICKED……">
+          <input id="search" type="search" autocomplete="off" aria-label="搜索知识库" placeholder="搜索：事件、页面跳转、队列、SD卡、LV_EVENT_CLICKED……">
           <button class="btn primary" id="searchBtn" type="button">搜索知识库</button>
         </div>
       </section>
@@ -70,7 +70,7 @@ document.getElementById('knowledgeBaseRoot').innerHTML = String.raw`
     <section class="reader" id="reader">
       <div class="reader-head">
         <div class="reader-actions">
-          <button class="btn soft" id="backBtn" type="button">返回入口</button>
+          <button class="btn soft" id="backBtn" type="button">返回模块目录</button>
         </div>
       </div>
       <div class="frame-wrap">

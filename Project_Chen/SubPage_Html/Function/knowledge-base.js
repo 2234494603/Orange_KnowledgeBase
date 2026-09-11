@@ -13,6 +13,9 @@
       const toast = document.getElementById('toast');
       let current = MODULES[0];
       const htmlCache = new Map();
+      let returnFocus = null;
+      const remember = (key, value) => { try { localStorage.setItem(key, value); } catch { /* 浏览器禁用存储时仍允许阅读。 */ } };
+      const recalled = key => { try { return localStorage.getItem(key); } catch { return null; } };
 
       function bytesFromBase64(value) {
         const bin = atob(value);
@@ -37,13 +40,16 @@
 
       function textOf(module) {
         const doc = new DOMParser().parseFromString(getHtml(module), 'text/html');
-        return [module.title, module.shortTitle, module.summary, module.group, (module.tags || []).join(' '), doc.body?.innerText || ''].join(' ');
+        doc.querySelectorAll('script, style').forEach(node => node.remove());
+        return [module.title, module.shortTitle, module.summary, module.group, (module.tags || []).join(' '), doc.body?.textContent || ''].join(' ');
       }
 
       function framedHtml(module) {
         const themeUrl = new URL('./SubPage_Html/Interface/manual-frame-theme.css', document.baseURI).href;
         const themeLink = '<link rel="stylesheet" href="' + themeUrl + '">';
-        return getHtml(module).replace('</head>', themeLink + '</head>');
+        const behaviorUrl = new URL('./SubPage_Html/Function/manual-frame-behavior.js', document.baseURI).href;
+        const behaviorScript = '<script src="' + behaviorUrl + '"></script>';
+        return getHtml(module).replace('</head>', themeLink + '</head>').replace('</body>', behaviorScript + '</body>');
       }
 
       function sizeLabel(bytes) {
@@ -76,19 +82,29 @@
         entries.querySelectorAll('.entry').forEach(card => card.addEventListener('click', () => openModule(card.dataset.id)));
       }
 
-      function openModule(id) {
+      function openModule(id, updateUrl = true) {
         const module = MODULES.find(item => item.id === id) || MODULES[0];
         current = module;
-        localStorage.setItem('lvgl_kb_current', module.id);
+        remember('lvgl_kb_current', module.id);
+        returnFocus = document.activeElement;
         viewer.title = module.title;
         viewer.srcdoc = framedHtml(module);
         document.body.classList.add('reading');
+        if (updateUrl) {
+          const url = new URL(location.href);
+          url.searchParams.set('module', module.id);
+          history.pushState(null, '', url.href);
+        }
+        document.getElementById('backBtn').focus({ preventScroll: true });
       }
 
       function goHome() {
         document.body.classList.remove('reading');
-        results.classList.remove('show');
-        history.replaceState(null, '', location.pathname);
+        const url = new URL(location.href);
+        url.searchParams.delete('module');
+        url.hash = '';
+        history.replaceState(null, '', url.href);
+        if (returnFocus?.isConnected && returnFocus !== document.body) returnFocus.focus({ preventScroll: true });
       }
 
       function goEntrance() {
@@ -109,8 +125,11 @@
         });
         results.classList.add('show');
         results.innerHTML = '<div class="section-title"><h2>搜索结果</h2><span>' + hits.length + ' 个模块匹配</span></div>' +
-          (hits.length ? hits.map(module => '<article class="result-card" data-id="' + module.id + '"><h3>' + module.shortTitle + '</h3><p>' + module.summary + '</p></article>').join('') : '<article class="result-card"><h3>没有找到</h3><p>换一个更短的关键词试试。</p></article>');
+          (hits.length ? hits.map(module => '<article class="result-card" data-id="' + module.id + '" tabindex="0" role="button" aria-label="打开 ' + module.shortTitle + '"><h3>' + module.shortTitle + '</h3><p>' + module.summary + '</p></article>').join('') : '<article class="result-card"><h3>没有找到</h3><p>换一个更短的关键词试试。</p></article>');
         results.querySelectorAll('[data-id]').forEach(card => card.addEventListener('click', () => openModule(card.dataset.id)));
+        results.querySelectorAll('[data-id]').forEach(card => card.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openModule(card.dataset.id); }
+        }));
         results.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
 
@@ -124,8 +143,9 @@
           area.style.opacity = '0';
           document.body.appendChild(area);
           area.select();
-          document.execCommand('copy');
+          const copied = document.execCommand('copy');
           area.remove();
+          if (!copied) { showToast('复制失败，请检查浏览器剪贴板权限'); return; }
         }
         showToast('已复制');
       }
@@ -164,8 +184,13 @@
           search.select();
         }
       });
-      const saved = localStorage.getItem('lvgl_kb_current');
+      const saved = recalled('lvgl_kb_current');
       if (saved && MODULES.some(module => module.id === saved)) current = MODULES.find(module => module.id === saved);
       const requested = new URLSearchParams(location.search).get('module');
-      if (requested && MODULES.some(module => module.id === requested)) openModule(requested);
+      if (requested && MODULES.some(module => module.id === requested)) openModule(requested, false);
+      window.addEventListener('popstate', () => {
+        const id = new URLSearchParams(location.search).get('module');
+        if (MODULES.some(module => module.id === id)) openModule(id, false);
+        else document.body.classList.remove('reading');
+      });
     })();
