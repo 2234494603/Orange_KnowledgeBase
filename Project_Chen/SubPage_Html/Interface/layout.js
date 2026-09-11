@@ -69,10 +69,6 @@ document.getElementById('knowledgeBaseRoot').innerHTML = String.raw`
 
     <section class="reader" id="reader">
       <div class="reader-head">
-        <div class="reader-title">
-          <strong id="readerTitle">模块标题</strong>
-          <span id="readerMeta">模块信息</span>
-        </div>
         <div class="reader-actions">
           <button class="btn soft" id="backBtn" type="button">返回入口</button>
         </div>

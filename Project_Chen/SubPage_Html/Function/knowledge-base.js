@@ -10,8 +10,6 @@
       const search = document.getElementById('search');
       const results = document.getElementById('results');
       const viewer = document.getElementById('viewer');
-      const readerTitle = document.getElementById('readerTitle');
-      const readerMeta = document.getElementById('readerMeta');
       const toast = document.getElementById('toast');
       let current = MODULES[0];
       const htmlCache = new Map();
@@ -82,8 +80,6 @@
         const module = MODULES.find(item => item.id === id) || MODULES[0];
         current = module;
         localStorage.setItem('lvgl_kb_current', module.id);
-        readerTitle.textContent = module.title;
-        readerMeta.textContent = module.group + ' · ' + module.fileName + ' · SHA256 ' + module.sha256.slice(0, 12);
         viewer.title = module.title;
         viewer.srcdoc = framedHtml(module);
         document.body.classList.add('reading');
