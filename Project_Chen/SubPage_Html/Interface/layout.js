@@ -78,7 +78,7 @@ document.getElementById('knowledgeBaseRoot').innerHTML = String.raw`
         </div>
       </div>
       <div class="frame-wrap">
-        <article class="content-view article" id="contentView"></article>
+        <iframe class="module-viewer" id="viewer" title="知识库模块"></iframe>
       </div>
     </section>
   </div>

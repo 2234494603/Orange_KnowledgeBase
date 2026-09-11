@@ -3,11 +3,13 @@
 (() => {
       const MODULES = window.KNOWLEDGE_BASE_MODULES;
       if (!Array.isArray(MODULES)) throw new Error('知识库模块数据加载失败');
+      const lvglModule = MODULES.find(module => module.id === 'designer-api');
+      if (lvglModule) lvglModule.shortTitle = 'LVGL';
       const decoder = new TextDecoder('utf-8');
       const entries = document.getElementById('entries');
       const search = document.getElementById('search');
       const results = document.getElementById('results');
-      const contentView = document.getElementById('contentView');
+      const viewer = document.getElementById('viewer');
       const readerTitle = document.getElementById('readerTitle');
       const readerMeta = document.getElementById('readerMeta');
       const toast = document.getElementById('toast');
@@ -40,15 +42,10 @@
         return [module.title, module.shortTitle, module.summary, module.group, (module.tags || []).join(' '), doc.body?.innerText || ''].join(' ');
       }
 
-      function contentOf(module) {
-        const doc = new DOMParser().parseFromString(getHtml(module), 'text/html');
-        const main = doc.querySelector('main#content') || doc.querySelector('main') || doc.body;
-        const clone = main.cloneNode(true);
-        clone.querySelectorAll('script, style, link, meta, title, .toolbar, nav, .toast, .back-top, .progress, .progress-track').forEach(node => node.remove());
-        clone.querySelectorAll('[id]').forEach(node => {
-          node.id = 'module-' + module.id + '-' + node.id;
-        });
-        return clone.innerHTML;
+      function framedHtml(module) {
+        const themeUrl = new URL('./SubPage_Html/Interface/manual-frame-theme.css', document.baseURI).href;
+        const themeLink = '<link rel="stylesheet" href="' + themeUrl + '">';
+        return getHtml(module).replace('</head>', themeLink + '</head>');
       }
 
       function sizeLabel(bytes) {
@@ -87,33 +84,14 @@
         localStorage.setItem('lvgl_kb_current', module.id);
         readerTitle.textContent = module.title;
         readerMeta.textContent = module.group + ' · ' + module.fileName + ' · SHA256 ' + module.sha256.slice(0, 12);
-        contentView.innerHTML = contentOf(module);
-        enhanceArticle();
+        viewer.title = module.title;
+        viewer.srcdoc = framedHtml(module);
         document.body.classList.add('reading');
       }
 
       function goHome() {
         document.body.classList.remove('reading');
         results.classList.remove('show');
-      }
-
-      function enhanceArticle() {
-        contentView.querySelectorAll('code').forEach(code => {
-          code.title = '点击复制';
-          code.addEventListener('click', () => copyText(code.textContent));
-        });
-        contentView.querySelectorAll('pre').forEach(pre => {
-          if (pre.querySelector('.copy-code')) return;
-          const button = document.createElement('button');
-          button.className = 'copy-code';
-          button.type = 'button';
-          button.textContent = '复制代码';
-          button.addEventListener('click', event => {
-            event.stopPropagation();
-            copyText(pre.querySelector('code')?.textContent || pre.textContent);
-          });
-          pre.appendChild(button);
-        });
       }
 
       function doSearch() {

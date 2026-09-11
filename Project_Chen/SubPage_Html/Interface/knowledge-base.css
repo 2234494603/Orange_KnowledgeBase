@@ -939,6 +939,16 @@ h1 {
     radial-gradient(ellipse at 88% 30%, rgba(119, 91, 255, .17), transparent 34%),
     linear-gradient(90deg, rgba(1, 7, 10, .12), transparent 35% 65%, rgba(3, 5, 14, .16));
 }
+.module-viewer {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color-scheme: dark;
+}
 @keyframes readerStarDrift {
   from { background-position: 0 0, 43px 29px, 17px 61px; }
   to { background-position: -103px 72px, -114px 108px, -206px 148px; }
