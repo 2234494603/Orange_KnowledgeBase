@@ -168,3 +168,40 @@ nav a.active,
   .search-wrap { grid-row: 3; }
   .filter-row { grid-row: 4; }
 }
+
+/* 保留主题与选中/答题反馈，避免统一玻璃背景盖住控件状态。 */
+main h2 { scroll-margin-top: var(--manual-toolbar-height, 190px) !important; }
+.mode-btn.active, .mode.active, .recipe-tab.active {
+  border-color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 16%, var(--panel)) !important;
+}
+.quiz-option.correct { border-color: var(--good) !important; background: color-mix(in srgb, var(--good) 18%, var(--panel)) !important; }
+.quiz-option.wrong { border-color: var(--danger) !important; background: color-mix(in srgb, var(--danger) 16%, var(--panel)) !important; }
+body[data-theme="light"] {
+  color-scheme: light;
+  --panel: rgba(239, 247, 249, .94);
+  --panel-2: rgba(218, 234, 240, .94);
+  --line: rgba(28, 76, 101, .24);
+  --text: #183142;
+  --muted: #426070;
+  --accent: #126889;
+  --code: #075c7a;
+  --good: #148355;
+  --danger: #b92d48;
+  background: rgba(230, 241, 246, .9) !important;
+}
+body[data-theme="light"] :is(.toolbar, .hero, .card, .callout, .quiz, .check-item, .stat, .state-node, .about-card, .info-card, table) { background: var(--panel) !important; }
+body[data-theme="light"] :is(.mode-btn, .mode, #search, #sectionFilter, .chip, .tool-btn, .action-btn, .recipe-tab, .quiz-option, .notes-area, .notes) { background: var(--panel-2) !important; color: var(--text) !important; }
+body[data-theme="light"] th { color: #194050 !important; background: rgba(49, 126, 161, .13) !important; }
+body[data-theme="light"] :is(.mode-btn.active, .mode.active, .recipe-tab.active) { background: #b3dbe9 !important; }
+body[data-theme="light"] .quiz-option.correct { background: #bce6d0 !important; }
+body[data-theme="light"] .quiz-option.wrong { background: #f1c6cd !important; }
+@media (max-width: 600px) {
+  .filter-row { flex-wrap: wrap !important; }
+  #sectionFilter { max-width: 100%; }
+  pre, table { max-width: 100%; }
+}
+@media print {
+  html, body, body[data-theme="light"] { background: white !important; color: black !important; }
+  :is(.hero, .card, .callout, .quiz, .check-item, .stat, .state-node, table, pre) { background: white !important; color: black !important; box-shadow: none !important; backdrop-filter: none !important; }
+}

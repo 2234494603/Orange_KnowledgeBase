@@ -70,7 +70,7 @@ document.getElementById('knowledgeBaseRoot').innerHTML = String.raw`
     <section class="reader" id="reader">
       <div class="reader-head">
         <div class="reader-actions">
-          <button class="btn soft" id="backBtn" type="button">返回模块目录</button>
+          <button class="btn soft" id="backBtn" type="button">返回知识库</button>
         </div>
       </div>
       <div class="frame-wrap">

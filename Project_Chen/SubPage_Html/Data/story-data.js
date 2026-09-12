@@ -1,45 +1,52 @@
 'use strict';
 
-// 暂用介绍文案：正式文案到位后，只需替换本配置，不必调整动效与布局。
+// 正式故事文案与插画映射。每条 scene 对应一屏，界面与转场无需随文案修改。
 window.PROX_STORY_CONTENT = Object.freeze({
   menuTitle: '选择一段旅程',
-  menuIntro: '走进 Pro-X，或从一条知识开始。',
-  storyLabel: '故事介绍',
-  storyDescription: '关于起点、构建，与还未抵达的地方',
+  menuIntro: '先听完一个关于星光、工程与无限可能的故事。',
+  storyLabel: '创办的初心',
+  storyDescription: '从倒数第一，到无人机开发工程师',
   libraryLabel: '进入知识库',
   libraryDescription: 'LVGL · FreeRTOS · 工程实践',
   libraryHref: './SubPage_Html/KnowledgeBase/index.html',
-  title: 'Pro-X 的故事',
-  chapters: [
-    {
-      label: '起点', english: 'THE BEGINNING', motif: '01',
-      title: '每一个界面，\n都始于一个想法。',
-      paragraphs: [
-        '一个控件，一次点击，一块被点亮的屏幕。看似微小的起点，连接着从想法到实现的整个过程。',
-        'Pro-X 从这里开始：把学习中的问题、调试中的发现和实践中的经验，一点点留下来。'
-      ],
-      keywords: ['好奇', '尝试', '记录'],
-      caption: '从第一行代码，到第一个回应。'
-    },
-    {
-      label: '构建', english: 'BUILDING CONNECTIONS', motif: '02',
-      title: '让零散的经验，\n有迹可循。',
-      paragraphs: [
-        '从 LVGL 的控件、样式与事件，到 FreeRTOS 的任务与协作，知识在具体的问题里产生，也在不断的实践中连接。',
-        '这里收录术语、API 与学习手册，让每一次查找都能成为下一步实践的起点。'
-      ],
-      keywords: ['LVGL', 'FreeRTOS', '实践'],
-      caption: '理解一个问题，也打开另一种可能。'
-    },
-    {
-      label: '延伸', english: 'BEYOND THE KNOWN', motif: '03',
-      title: '把下一步，\n留给探索。',
-      paragraphs: [
-        '知识库会随着新的问题与新的尝试慢慢生长。经验被重新发现，也会长出新的用法。',
-        '这段介绍只是开篇。接下来，选一个感兴趣的主题，继续把想法变成能够运行的作品。'
-      ],
-      keywords: ['探索', '积累', '继续'],
-      caption: '故事继续，下一页由实践写下。'
-    }
-  ]
+  title: '创办的初心',
+  scenes: Object.freeze([
+    { chapter: '序章', english: 'A LONG TIME AGO', text: '起初，我是班里的倒数第一。', image: '01-physics-classroom.png', align: 'left' },
+    { chapter: '序章', english: 'THE FIRST LIGHT', text: '后来，我非常热爱物理，所有科目里，只有物理学得非常好。', image: '01-physics-classroom.png', align: 'right' },
+    { chapter: '星光', english: 'A GUIDING STAR', text: '那时家里的状况并不好，物理却像星光一样指引着我前进，让我找到生活的意义。', image: '02-starlight-home.png', align: 'left' },
+    { chapter: '星光', english: 'CURIOSITY', text: '因为我对这个世界，始终充满着好奇。', image: '02-starlight-home.png', align: 'right' },
+    { chapter: '星光', english: 'HOW THE WORLD WORKS', text: '天体运行的规律、机器运作的奥秘，支撑着我一个又一个的想法。', image: '01-physics-classroom.png', align: 'left' },
+    { chapter: '转折', english: 'THE FACTORY', text: '但因为成绩太差，我不得不进入工厂。', image: '03-factory-school.png', align: 'left' },
+    { chapter: '转折', english: 'A DOOR OPENS', text: '幸运的是，那年我赶上高中扩招，进入了一所省重点高中。', image: '03-factory-school.png', align: 'right' },
+    { chapter: '第一步', english: 'THE FIRST STEP', text: '在那里，我勇敢地迈出了第一步。', image: '04-science-competition.png', align: 'left' },
+    { chapter: '第一步', english: 'INNOVATION', text: '我报名参加全国青少年科技创新大赛，并获得省二等奖。', image: '04-science-competition.png', align: 'right' },
+    { chapter: '第一步', english: 'THE DREAM BEGINS', text: '就这样，我踏上了梦想的第一步。', image: '04-science-competition.png', align: 'center' },
+    { chapter: '相信', english: 'STILL AN OUTSIDER', text: '进入高中后，我依然因为成绩太差，被当作差生看待。', image: '01-physics-classroom.png', align: 'right' },
+    { chapter: '相信', english: 'I STILL BELIEVED', text: '但我依旧相信：我可以用自己的想法去改变这个世界。', image: '01-physics-classroom.png', align: 'left' },
+    { chapter: '相信', english: 'SMALL DREAMS', text: '我开始追求一个又一个小小的梦想。', image: '02-starlight-home.png', align: 'center' },
+    { chapter: '再出发', english: 'ANOTHER ROAD', text: '高考那年，因为成绩太差，我没有报名高考，后来进入了一所大专。', image: '05-model-and-code.png', align: 'left' },
+    { chapter: '再出发', english: 'THE SAME PERSON', text: '但我依旧相信，我还是那个能够用想法改变世界的人。', image: '05-model-and-code.png', align: 'right' },
+    { chapter: '再出发', english: 'THE FIRST MODEL', text: '后来我加入竞赛队，开始绘制第一个模型。', image: '05-model-and-code.png', align: 'left' },
+    { chapter: '再出发', english: 'THE UNIVERSITY', text: '一路走来，我考取了曾经没有考上的本科。', image: '05-model-and-code.png', align: 'right' },
+    { chapter: '再出发', english: 'LEARNING TO CODE', text: '备考本科期间，我又自学了编程；说实话，最初真的看不懂。', image: '05-model-and-code.png', align: 'left' },
+    { chapter: '第一', english: 'NUMBER ONE', text: '我获得了全专业第一，所有人都在为我欢呼。', image: '06-graduation-crossroads.png', align: 'left' },
+    { chapter: '第一', english: 'THE FEAR INSIDE', text: '但是我的内心却非常恐慌：我还没有结婚，我的梦想就要止步于此了吗？', image: '06-graduation-crossroads.png', align: 'right' },
+    { chapter: '第一', english: 'END OR BEGINNING', text: '第一，究竟是一段旅程的结束，还是另一段旅程的开始？', image: '06-graduation-crossroads.png', align: 'center' },
+    { chapter: '深圳', english: 'A NEW BEGINNING', text: '我相信，这是一段开始。', image: '06-graduation-crossroads.png', align: 'center' },
+    { chapter: '深圳', english: 'THE CHOICE', text: '于是我拒绝了一家上市公司的 offer，贷款来到深圳进行培训。', image: '07-shenzhen-training.png', align: 'left' },
+    { chapter: '深圳', english: 'SHINE BRIGHTER', text: '我想让自己的梦想，发出更大的光亮。', image: '07-shenzhen-training.png', align: 'right' },
+    { chapter: '深圳', english: 'BREAKTHROUGH', text: '就这样，经过一轮培训，我打破了培训班的纪录。', image: '07-shenzhen-training.png', align: 'left' },
+    { chapter: '现在', english: 'THE ENGINEER', text: '写下这个网站时，我是一名无人机开发工程师。', image: '08-drone-engineer.png', align: 'right' },
+    { chapter: '现在', english: 'SEPTEMBER 10', text: '这个网站，是我从 9 月 10 日开始写的。', image: '08-drone-engineer.png', align: 'left' },
+    { chapter: '初心', english: 'WHY THIS EXISTS', text: '我想做一个意义非凡的网站。', image: '08-drone-engineer.png', align: 'center' },
+    { chapter: '初心', english: 'OPEN TO EVERYONE', text: '它没有任何充值系统，也没有任何会员机制。', image: '08-drone-engineer.png', align: 'right' },
+    { chapter: '初心', english: 'FROM AN ENGINEER', text: '这是一份工程师写给高中生的网站。', image: '09-infinite-journey.png', align: 'left' },
+    { chapter: '初心', english: 'LEARN BY BUILDING', text: '它会教高中生如何开发，如何快速写出一个单片机程序。', image: '09-infinite-journey.png', align: 'right' },
+    { chapter: '无限', english: 'INFINITE POSSIBILITY', text: '这一切很难，但只要开始做，就有无限的可能。', image: '09-infinite-journey.png', align: 'left' },
+    { chapter: '无限', english: 'PRO IS BRO', text: 'Pro 是 Bro，而 Bro 就是你。', image: '09-infinite-journey.png', align: 'center', emphasis: true },
+    { chapter: '无限', english: 'X MEANS INFINITY', text: 'Bro 有无限的可能；对于无限，我们习惯把它定义为 X。', image: '09-infinite-journey.png', align: 'center', emphasis: true },
+    { chapter: '启程', english: 'YOUR JOURNEY', text: '所以 Bro，你准备好自己的征程了吗……', image: '09-infinite-journey.png', align: 'center', emphasis: true },
+    { chapter: '承诺', english: 'A PROMISE', text: '我会拒绝任何营利性质的组织加入。', image: '09-infinite-journey.png', align: 'left' },
+    { chapter: '承诺', english: 'FOR THE PUBLIC GOOD', text: '如果这个网站最后无法运营下去，我希望把它交给公益组织……', image: '09-infinite-journey.png', align: 'center', emphasis: true }
+  ])
 });

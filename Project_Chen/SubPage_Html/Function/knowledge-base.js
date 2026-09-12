@@ -66,7 +66,7 @@
       function renderEntries() {
         entries.innerHTML = MODULES.map((module, index) => {
           const tags = (module.tags || []).map(tag => '<span class="tag">' + tag + '</span>').join('');
-          return '<article class="entry" style="--accent:' + module.accent + '" data-id="' + module.id + '">' +
+          return '<article class="entry" style="--accent:' + module.accent + '" data-id="' + module.id + '" tabindex="0" role="button" aria-label="打开 ' + module.shortTitle + '">' +
             '<div class="entry-kicker"><span>' + module.group + '</span><span>' + sizeLabel(module.size) + '</span></div>' +
             '<h3>' + module.shortTitle + '</h3>' +
             '<p>' + module.summary + '</p>' +
@@ -79,7 +79,12 @@
           event.stopPropagation();
           openModule(btn.dataset.open);
         }));
-        entries.querySelectorAll('.entry').forEach(card => card.addEventListener('click', () => openModule(card.dataset.id)));
+        entries.querySelectorAll('.entry').forEach(card => {
+          card.addEventListener('click', () => openModule(card.dataset.id));
+          card.addEventListener('keydown', event => {
+            if (event.target === card && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openModule(card.dataset.id); }
+          });
+        });
       }
 
       function openModule(id, updateUrl = true) {
