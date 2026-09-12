@@ -1,16 +1,6 @@
 'use strict';
 
 document.getElementById('entranceRoot').insertAdjacentHTML('beforeend', String.raw`
-  <dialog class="journey-menu" id="journeyMenu" aria-labelledby="journeyMenuTitle" aria-describedby="journeyMenuIntro">
-    <div class="journey-menu-top"><span class="story-overline">PRO-X / EXPLORE</span><button class="story-icon-button" id="journeyMenuClose" type="button" aria-label="关闭菜单">×</button></div>
-    <h2 id="journeyMenuTitle"></h2><p id="journeyMenuIntro"></p>
-    <div class="journey-options">
-      <button class="journey-option" id="journeyStart" type="button"><span class="journey-option-number" aria-hidden="true">01</span><span><strong id="journeyStoryLabel"></strong><small id="journeyStoryDescription"></small></span><span class="journey-option-arrow" aria-hidden="true">↗</span></button>
-      <a class="journey-option" id="journeyLibrary"><span class="journey-option-number" aria-hidden="true">02</span><span><strong id="journeyLibraryLabel"></strong><small id="journeyLibraryDescription"></small></span><span class="journey-option-arrow" aria-hidden="true">↗</span></a>
-    </div>
-    <p class="journey-menu-foot">跟随星光，走近一点。<span aria-hidden="true">✦</span></p>
-  </dialog>
-
   <canvas class="space-transition" id="spaceTransition" aria-hidden="true" hidden></canvas>
 
   <section class="story-scene" id="storyScene" aria-label="Pro-X 创办的初心" hidden>

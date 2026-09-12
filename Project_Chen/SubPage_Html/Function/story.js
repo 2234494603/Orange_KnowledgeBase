@@ -6,7 +6,6 @@
 
   const byId = id => document.getElementById(id);
   const trigger = byId('entranceTitle');
-  const menu = byId('journeyMenu');
   const shell = document.querySelector('.entrance-shell');
   const scene = byId('storyScene');
   const stage = byId('storyStage');
@@ -49,12 +48,7 @@
     return imageCache.get(url);
   }
 
-  for (const [id, key] of Object.entries({
-    journeyMenuTitle: 'menuTitle', journeyMenuIntro: 'menuIntro', journeyStoryLabel: 'storyLabel',
-    journeyStoryDescription: 'storyDescription', journeyLibraryLabel: 'libraryLabel',
-    journeyLibraryDescription: 'libraryDescription', storySeries: 'title'
-  })) text(id, content[key]);
-  byId('journeyLibrary').href = content.libraryHref;
+  text('storySeries', content.title);
   byId('storyLibrary').href = content.libraryHref;
 
   function paintBackground(item, immediate = false) {
@@ -99,34 +93,18 @@
     preload(content.scenes[index - 1] || item);
   }
 
-  function openMenu() {
-    if (view !== 'home') return;
-    setView('menu');
-    trigger.setAttribute('aria-expanded', 'true');
-    if (typeof menu.showModal === 'function') menu.showModal(); else menu.setAttribute('open', '');
-    byId('journeyStart').focus();
-  }
-
-  function closeMenu({ restoreFocus = true } = {}) {
-    if (menu.open && typeof menu.close === 'function') menu.close(); else menu.removeAttribute('open');
-    trigger.setAttribute('aria-expanded', 'false');
-    if (view === 'menu') setView('home');
-    if (restoreFocus && view === 'home') trigger.focus({ preventScroll: true });
-  }
-
   async function enterStory() {
-    if (view !== 'menu') return;
+    if (view !== 'home') return;
     const token = ++transitionRevision;
-    await preload(content.scenes[0]);
-    if (token !== transitionRevision) return;
-    closeMenu({ restoreFocus: false });
     setView('entering');
     shell.inert = true;
+    const loading = preload(content.scenes[0]);
     const burst = fx.play();
-    await animate(shell, [
+    const shellExit = animate(shell, [
       { transform: 'perspective(1200px) translateZ(-180px) rotateX(7deg)', filter: 'blur(4px)', opacity: .36 },
       { transform: 'perspective(1200px) translateZ(-430px) rotateX(28deg) scale(.08,.025)', filter: 'blur(5px)', opacity: 0 }
     ], 540, 'cubic-bezier(.5,0,.8,.35)');
+    await Promise.all([shellExit, loading]);
     if (token !== transitionRevision) return;
     shell.hidden = true;
     scene.hidden = false;
@@ -178,7 +156,6 @@
     shell.getAnimations().forEach(animation => animation.cancel());
     stage.getAnimations().forEach(animation => animation.cancel());
     page.getAnimations().forEach(animation => animation.cancel());
-    if (menu.open) closeMenu({ restoreFocus: false });
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     scene.hidden = true;
     scene.inert = false;
@@ -220,17 +197,7 @@
     text('storyFullscreenLabel', active ? '退出全屏' : '全屏');
   }
 
-  trigger.addEventListener('click', openMenu);
-  byId('journeyMenuClose').addEventListener('click', () => closeMenu());
-  menu.addEventListener('cancel', event => { event.preventDefault(); closeMenu(); });
-  let backdropDown = false;
-  const isOutsideMenu = event => {
-    const rect = menu.getBoundingClientRect();
-    return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
-  };
-  menu.addEventListener('pointerdown', event => { backdropDown = isOutsideMenu(event); });
-  menu.addEventListener('click', event => { if (backdropDown && isOutsideMenu(event)) closeMenu(); backdropDown = false; });
-  byId('journeyStart').addEventListener('click', enterStory);
+  trigger.addEventListener('click', enterStory);
   byId('storyExit').addEventListener('click', leaveStory);
   byId('storyHome').addEventListener('click', leaveStory);
   byId('storyPrevious').addEventListener('click', () => changeScene(index - 1));

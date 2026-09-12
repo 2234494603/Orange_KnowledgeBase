@@ -2,12 +2,6 @@
 
 // 正式故事文案与插画映射。每条 scene 对应一屏，界面与转场无需随文案修改。
 window.PROX_STORY_CONTENT = Object.freeze({
-  menuTitle: '选择一段旅程',
-  menuIntro: '先听完一个关于星光、工程与无限可能的故事。',
-  storyLabel: '创办的初心',
-  storyDescription: '从倒数第一，到无人机开发工程师',
-  libraryLabel: '进入知识库',
-  libraryDescription: 'LVGL · FreeRTOS · 工程实践',
   libraryHref: './SubPage_Html/KnowledgeBase/index.html',
   title: '创办的初心',
   scenes: Object.freeze([
@@ -44,9 +38,19 @@ window.PROX_STORY_CONTENT = Object.freeze({
     { chapter: '初心', english: 'LEARN BY BUILDING', text: '它会教高中生如何开发，如何快速写出一个单片机程序。', image: '31-teaching-microcontrollers.png', align: 'right' },
     { chapter: '无限', english: 'INFINITE POSSIBILITY', text: '这一切很难，但只要开始做，就有无限的可能。', image: '32-infinite-possibility.png', align: 'left' },
     { chapter: '无限', english: 'PRO IS BRO', text: 'Pro 是 Bro，而 Bro 就是你。', image: '33-pro-is-bro.png', align: 'center', emphasis: true },
-    { chapter: '无限', english: 'X MEANS INFINITY', text: 'Bro 有无限的可能；对于无限，我们习惯把它定义为 X。', image: '34-x-means-infinity.png', align: 'center', emphasis: true },
-    { chapter: '启程', english: 'YOUR JOURNEY', text: '所以 Bro，你准备好自己的征程了吗……', image: '35-your-journey-begins.png', align: 'center', emphasis: true },
-    { chapter: '承诺', english: 'A PROMISE', text: '我会拒绝任何营利性质的组织加入。', image: '36-promise-no-profit.png', align: 'left' },
-    { chapter: '承诺', english: 'FOR THE PUBLIC GOOD', text: '如果这个网站最后无法运营下去，我希望把它交给公益组织……', image: '37-for-public-good.png', align: 'center', emphasis: true }
+    { chapter: '无限', english: 'BEYOND GENDER', text: '无论你是男生还是女生，都拥有无限的可能。', image: '34-any-gender-infinite.png', align: 'left' },
+    { chapter: '无限', english: 'NO BARRIERS', text: '请不要让性别成为你前进的绊脚石。', image: '35-gender-is-no-barrier.png', align: 'right' },
+    { chapter: '无限', english: 'X MEANS INFINITY', text: 'Bro 有无限的可能；对于无限，我们习惯把它定义为 X。', image: '36-x-means-infinity.png', align: 'center', emphasis: true },
+    { chapter: '启程', english: 'YOUR JOURNEY', text: '所以 Bro，你准备好自己的征程了吗……', image: '37-your-journey-begins.png', align: 'center', emphasis: true },
+    { chapter: '责任', english: 'WHAT TECHNOLOGY SERVES', text: '当然，我更加希望你在学会科技后，认真思考它应当服务于什么。', image: '38-after-learning-technology.png', align: 'left' },
+    { chapter: '责任', english: 'BUILD YOUR COUNTRY', text: '我希望你能将它用于发展自己的国家。', image: '39-develop-your-country.png', align: 'right' },
+    { chapter: '责任', english: 'LIGHT OF SCIENCE', text: '就像钱学森、于敏那样，把所学献给更长远的事业。', image: '40-scientists-light-the-way.png', align: 'left' },
+    { chapter: '责任', english: 'USE IT FOR GOOD', text: '请不要将技术用于侵害他人，抑或侵害任何国家。', image: '41-technology-without-harm.png', align: 'right' },
+    { chapter: '责任', english: 'TECHNOLOGY FOR EVERYONE', text: '正如雷军所说：“科技不再是高高在上的，科技必须服务于每一个人。”', image: '42-technology-serves-everyone.png', align: 'center', emphasis: true },
+    { chapter: '同行', english: 'BEYOND BORDERS', text: '无论你是什么国籍，我们都生活在同一片星空之下。', image: '43-beyond-nationality.png', align: 'left' },
+    { chapter: '同行', english: 'A SINCERE HOPE', text: '我由衷地希望，我们能够携手向前。', image: '44-sincere-hope.png', align: 'right' },
+    { chapter: '同行', english: 'OUR SHARED HOME', text: '一起建设人类文明的精神家园。', image: '45-human-spiritual-home.png', align: 'center', emphasis: true },
+    { chapter: '同行', english: 'NOTHING COULD BE COOLER', text: '将技术用于帮助身边的人，还有比这更酷的事情吗？', image: '46-nothing-cooler.png', align: 'center', emphasis: true },
+    { chapter: '承诺', english: 'FOR THE PUBLIC GOOD', text: '如果这个网站最后无法运营下去，我希望把它交给公益组织……', image: '47-for-public-good.png', align: 'center', emphasis: true }
   ])
 });

@@ -1,4 +1,4 @@
-/* Pro-X 全屏故事：菜单、插画舞台和控件。转场计算位于 Function。 */
+/* Pro-X 全屏故事：空间转场、插画舞台和控件。转场计算位于 Function。 */
 [hidden] { display: none !important; }
 
 .pro-x-trigger {
@@ -11,36 +11,10 @@
 .journey-hint { margin-top: 19px; color: #9aaec8; font-size: 11px; letter-spacing: .15em; }
 .journey-hint span { display: inline-block; margin-left: 5px; color: #d6e7fb; }
 .entrance-shell { transition: transform 550ms cubic-bezier(.2,.8,.2,1), filter 550ms, opacity 550ms; }
-body[data-journey="menu"] .entrance-shell { transform: perspective(1200px) translateZ(-180px) rotateX(7deg); filter: blur(4px); opacity: .36; }
 body[data-journey="entering"], body[data-journey="leaving"], body[data-journey="story"] { overflow: hidden; }
 .entrance-backdrop { transition: transform 1400ms ease, opacity 900ms; pointer-events: none; }
 body[data-journey="story"] .entrance-backdrop { transform: scale(1.08); opacity: 0; }
 
-.story-overline { color: #9db6d0; font-size: 10px; font-weight: 600; letter-spacing: .18em; line-height: 1.7; }
-.journey-menu {
-  position: fixed; inset: 0; margin: auto; width: min(540px, calc(100% - 32px)); max-height: calc(100dvh - 32px);
-  padding: 28px 30px 20px; overflow-y: auto; border: 1px solid #cadfff38; border-radius: 24px;
-  background: linear-gradient(130deg, #192639ed, #080f1df5); box-shadow: 0 50px 140px #000a, inset 0 1px #ffffff14;
-  backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); color: #ecf3ff; text-align: left;
-}
-.journey-menu[open] { animation: journey-menu-in 500ms cubic-bezier(.16,1,.3,1) both; }
-.journey-menu::backdrop { background: #02081366; }
-.journey-menu-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.story-icon-button { width: 36px; height: 36px; border: 1px solid #b8d8ff26; border-radius: 50%; color: #cad9eb; background: #c9dfff09; font: 23px/1 inherit; cursor: pointer; }
-.journey-menu h2 { color: #f3f7fd; font-size: 27px; font-weight: 500; letter-spacing: .02em; }
-.journey-menu > p { margin-top: 10px; color: #9eb0c7; font-size: 13px; line-height: 1.8; }
-.journey-options { display: grid; gap: 10px; margin-top: 28px; }
-.journey-option {
-  display: flex; align-items: center; gap: 16px; width: 100%; padding: 22px 18px; border: 1px solid #b9d5f42b;
-  border-radius: 12px; color: #ecf3ff; background: #d5e9ff06; text-align: left; text-decoration: none;
-  font-family: inherit; cursor: pointer; transition: transform 220ms, background 220ms, border-color 220ms;
-}
-.journey-option:hover { transform: perspective(800px) translateZ(14px); background: #c1dcff10; border-color: #a7cef870; }
-.journey-option-number { font-family: Georgia, serif; font-size: 23px; color: #8eabc6; }
-.journey-option strong { display: block; font-size: 17px; font-weight: 500; }
-.journey-option small { display: block; margin-top: 6px; color: #97abc2; font-size: 11px; line-height: 1.7; }
-.journey-option-arrow { margin-left: auto; font-size: 23px; color: #b4d8e6; }
-.journey-menu .journey-menu-foot { display: flex; justify-content: space-between; margin-top: 24px; font-size: 11px; color: #7f98b3; }
 .space-transition { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none; }
 
 .story-scene {
@@ -131,14 +105,11 @@ body[data-journey="story"] .entrance-backdrop { transform: scale(1.08); opacity:
 .story-progress { height: 1px; overflow: hidden; background: #d4e7f43d; }
 .story-progress span { display: block; height: 100%; width: 0; background: #d0ecff; box-shadow: 0 0 10px #b0e3ff; transition: width 650ms cubic-bezier(.2,.8,.2,1); }
 .story-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.story-scene button:focus-visible, .story-scene a:focus-visible, .journey-menu button:focus-visible, .journey-menu a:focus-visible { outline: 2px solid #b4e2f2; outline-offset: 5px; }
+.story-scene button:focus-visible, .story-scene a:focus-visible { outline: 2px solid #b4e2f2; outline-offset: 5px; }
 
-@keyframes journey-menu-in { from { opacity: 0; transform: perspective(1000px) translateY(35px) rotateX(-12deg) scale(.9); } to { opacity: 1; transform: perspective(1000px) translateY(0) rotateX(0) scale(1); } }
 @keyframes story-breathe { 50% { opacity: .45; transform: translateY(2px); } }
 
 @media (max-width: 760px) {
-  .journey-menu { padding: 22px 20px 17px; }
-  .journey-option { padding: 18px 12px; gap: 12px; }
   .story-header { height: 76px; padding-inline: 17px; }
   .story-brand { font-size: 24px; gap: 12px; }
   .story-brand span { padding-left: 12px; font-size: 7px; max-width: 105px; }
@@ -171,11 +142,9 @@ body[data-journey="story"] .entrance-backdrop { transform: scale(1.08); opacity:
 
 @media (prefers-reduced-motion: reduce) {
   .entrance-shell, .entrance-backdrop, .story-art, .story-progress span { transition: none; }
-  body[data-journey="menu"] .entrance-shell { transform: none; }
-  .journey-menu[open], .story-continue { animation: none; }
+  .story-continue { animation: none; }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .journey-menu { background: #101b2bf5; }
   .story-utility { background: #07111de8; }
 }

@@ -12,7 +12,7 @@ document.getElementById('entranceRoot').innerHTML = String.raw`
   <main class="entrance-shell" aria-labelledby="entranceTitle">
     <section class="entrance-content">
       <p class="entrance-eyebrow entrance-reveal" id="entranceEyebrow"></p>
-      <h1 class="entrance-title entrance-reveal"><button class="pro-x-trigger" id="entranceTitle" type="button" aria-haspopup="dialog" aria-controls="journeyMenu" aria-expanded="false" aria-describedby="journeyHint"></button></h1>
+      <h1 class="entrance-title entrance-reveal"><button class="pro-x-trigger" id="entranceTitle" type="button" aria-label="进入 Pro-X 故事" aria-describedby="journeyHint"></button></h1>
       <p class="journey-hint" id="journeyHint">点击 Pro-X · 探索故事 <span aria-hidden="true">↗</span></p>
 
       <div class="entrance-glass entrance-reveal">
