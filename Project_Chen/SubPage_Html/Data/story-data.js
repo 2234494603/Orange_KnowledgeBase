@@ -51,6 +51,18 @@ window.PROX_STORY_CONTENT = Object.freeze({
     { chapter: '同行', english: 'A SINCERE HOPE', text: '我由衷地希望，我们能够携手向前。', image: '44-sincere-hope.png', align: 'right' },
     { chapter: '同行', english: 'OUR SHARED HOME', text: '一起建设人类文明的精神家园。', image: '45-human-spiritual-home.png', align: 'center', emphasis: true },
     { chapter: '同行', english: 'NOTHING COULD BE COOLER', text: '将技术用于帮助身边的人，还有比这更酷的事情吗？', image: '46-nothing-cooler.png', align: 'center', emphasis: true },
-    { chapter: '承诺', english: 'FOR THE PUBLIC GOOD', text: '如果这个网站最后无法运营下去，我希望把它交给公益组织……', image: '47-for-public-good.png', align: 'center', emphasis: true }
+    { chapter: '试炼', english: 'WHEN YOU BEGIN', text: '当你踏上这条路的时候。', image: '47-road-of-trial.png', align: 'left' },
+    { chapter: '试炼', english: 'TRIAL AND ERROR', text: '就注定与错误和尝试相伴。', image: '48-trial-and-error.png', align: 'right' },
+    { chapter: '试炼', english: 'FAILURE WILL COME', text: '你将不断犯错，甚至经历失败。', image: '49-failure-and-debugging.png', align: 'left' },
+    { chapter: '成长', english: 'PLEASE BELIEVE', text: '但请你相信——', image: '50-please-believe.png', align: 'center', emphasis: true },
+    { chapter: '成长', english: 'EVERY STEP MATTERS', text: '每一次错误与失败，都是一次成长。', image: '51-failure-becomes-growth.png', align: 'right' },
+    { chapter: '成长', english: 'KEEP GOING', text: '加油……', image: '52-keep-going.png', align: 'center', emphasis: true },
+    { chapter: '致未来', english: 'FUTURE DEVELOPERS', text: '未来的开发者们……', image: '53-future-developers.png', align: 'center', emphasis: true },
+    { chapter: '致未来', english: 'THE LIGHT OF CIVILIZATION', text: '你们是人类社会文明的结晶。', image: '54-crystallization-of-civilization.png', align: 'left' },
+    { chapter: '致未来', english: 'THE FOUNDATION', text: '也是工业社会的基石。', image: '55-industrial-foundation.png', align: 'right' },
+    { chapter: '致未来', english: 'CREATION MOVES US FORWARD', text: '你们的创造，推动着人类文明的发展。', image: '56-creations-advance-civilization.png', align: 'left' },
+    { chapter: '致未来', english: 'YOU ARE GREAT', text: '你们如此伟大……', image: '57-developers-are-great.png', align: 'center', emphasis: true },
+    { chapter: '致未来', english: 'AS GREAT AS HEROES', text: '像军人和那些英雄一样伟大……', image: '58-as-great-as-heroes.png', align: 'center', emphasis: true },
+    { chapter: '承诺', english: 'FOR THE PUBLIC GOOD', text: '如果这个网站最后无法运营下去，我希望把它交给公益组织……', image: '59-for-public-good.png', align: 'center', emphasis: true }
   ])
 });
