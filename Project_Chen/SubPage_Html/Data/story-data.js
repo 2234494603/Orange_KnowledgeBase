@@ -31,7 +31,7 @@ window.PROX_STORY_CONTENT = Object.freeze({
     { chapter: '深圳', english: 'SHINE BRIGHTER', text: '我想让自己的梦想，发出更大的光亮。', image: '24-dream-shines-shenzhen.png', align: 'right' },
     { chapter: '深圳', english: 'BREAKTHROUGH', text: '就这样，经过一轮培训，我打破了培训班的纪录。', image: '25-training-breakthrough.png', align: 'left' },
     { chapter: '现在', english: 'THE ENGINEER', text: '写下这个网站时，我是一名无人机开发工程师。', image: '26-drone-engineer.png', align: 'right' },
-    { chapter: '现在', english: 'SEPTEMBER 10', text: '这个网站，是我从 9 月 10 日开始写的。', image: '27-september-tenth.png', align: 'left' },
+    { chapter: '现在', english: 'SEPTEMBER 10', text: '这个网站，是我从 2026年 09 月 10 日开始写的。', image: '27-september-tenth.png', align: 'left' },
     { chapter: '初心', english: 'WHY THIS EXISTS', text: '我想做一个意义非凡的网站。', image: '28-meaningful-website.png', align: 'center' },
     { chapter: '初心', english: 'OPEN TO EVERYONE', text: '它没有任何充值系统，也没有任何会员机制。', image: '29-open-to-everyone.png', align: 'right' },
     { chapter: '初心', english: 'FROM AN ENGINEER', text: '这是一份工程师写给高中生的网站。', image: '30-engineers-letter.png', align: 'left' },
